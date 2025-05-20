@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/simcity/static/css/main.323d7611.css",
+    "main.js": "/simcity/static/js/main.8f5d1eca.js",
+    "static/js/453.1bceff5b.chunk.js": "/simcity/static/js/453.1bceff5b.chunk.js",
+    "index.html": "/simcity/index.html",
+    "main.323d7611.css.map": "/simcity/static/css/main.323d7611.css.map",
+    "main.8f5d1eca.js.map": "/simcity/static/js/main.8f5d1eca.js.map",
+    "453.1bceff5b.chunk.js.map": "/simcity/static/js/453.1bceff5b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.323d7611.css",
+    "static/js/main.8f5d1eca.js"
+  ]
+}
