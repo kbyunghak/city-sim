@@ -1,24 +1,429 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import MapComponentWrapper from './components/MapComponentWrapper';
+import SimulationModal from './components/SimulationModal';
+import { buildingOptions, initialMarkers, burnabyPolygon, burnaby2025 } from './constants/mapData';
+import LegendModal from './components/LegendModal';
+
+// Function to check if a point is inside a polygon using the ray-casting algorithm
+// Reference: https://stackoverflow.com/questions/22521982/how-to-check-if-a-point-is-inside-a-polygon
+// This function assumes the polygon is defined in a clockwise or counter-clockwise order
+// and that the polygon is closed (the first and last points are the same).
+// The function takes a point (lat, lng) and a polygon (array of [lat, lng] pairs) as input
+// and returns true if the point is inside the polygon, false otherwise.
+function pointInPolygon(point, polygon) {
+  const [x, y] = [point.lng, point.lat];
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i][1], yi = polygon[i][0];
+    const xj = polygon[j][1], yj = polygon[j][0];
+    const intersect =
+      ((yi > y) !== (yj > y)) &&
+      (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function isInsideBurnaby(latlng) {
+  return pointInPolygon(latlng, burnabyPolygon);
+}
+
+const runSimulation = (markers) => {
+  const baseData = { ...burnaby2025 }; // start from 2025 data
+
+  // impact multipliers per building type, can be adjusted for more accuracy
+  const impactPerBuilding = {
+    Market: { populationPercent: 0.03, trafficPercent: 0.05, crimePercent: 0.02, housingSatisfactionPercent: 0.01, unemploymentPercent: -0.02, housingSupplyPercent: 0.005, airQualityPercent: -0.03, inflationPercent: 0.002 },
+    School: { populationPercent: 0.05, trafficPercent: -0.02, crimePercent: -0.05, housingSatisfactionPercent: 0.04, unemploymentPercent: -0.03, housingSupplyPercent: 0.002, airQualityPercent: 0.02, inflationPercent: 0.001 },
+    CommunityCentre: { populationPercent: 0.02, trafficPercent: -0.01, crimePercent: -0.03, housingSatisfactionPercent: 0.07, unemploymentPercent: -0.01, housingSupplyPercent: 0.001, airQualityPercent: 0.04, inflationPercent: 0.001 },
+    Hospital: { populationPercent: 0.03, trafficPercent: -0.10, crimePercent: -0.02, housingSatisfactionPercent: 0.03, unemploymentPercent: -0.01, housingSupplyPercent: 0, airQualityPercent: 0.05, inflationPercent: 0.001 },
+    PoliceStation: { populationPercent: 0.01, trafficPercent: -0.15, crimePercent: -0.20, housingSatisfactionPercent: 0.05, unemploymentPercent: 0, housingSupplyPercent: 0, airQualityPercent: 0.01, inflationPercent: 0 },
+    NonProfitHousing: { populationPercent: 0.08, trafficPercent: 0.02, crimePercent: 0.01, housingSatisfactionPercent: 0.10, unemploymentPercent: -0.05, housingSupplyPercent: 0.02, airQualityPercent: -0.05, inflationPercent: 0.002 },
+    Daycare: { populationPercent: 0.04, trafficPercent: 0, crimePercent: 0, housingSatisfactionPercent: 0.03, unemploymentPercent: -0.01, housingSupplyPercent: 0, airQualityPercent: 0, inflationPercent: 0.001 },
+    SeniorCentre: { populationPercent: 0.02, trafficPercent: 0, crimePercent: -0.01, housingSatisfactionPercent: 0.06, unemploymentPercent: 0, housingSupplyPercent: 0, airQualityPercent: 0.01, inflationPercent: 0 },
+  };
+
+  // Count the number of each building type installed
+  const buildingCounts = markers.reduce((counts, marker) => {
+    counts[marker.buildingName] = (counts[marker.buildingName] || 0) + 1;
+    return counts;
+  }, {});
+
+  // Initialize data array with base year
+  const data = [baseData];
+
+  const yearsToSimulate = 2050 - 2025;
+
+  // Compute the total percentage impacts from all buildings multiplied by their counts
+  const totalImpactPercent = Object.entries(buildingCounts).reduce((total, [building, count]) => {
+    const impact = impactPerBuilding[building];
+    if (!impact) return total;
+
+    // Add building impact * count to total
+    Object.keys(impact).forEach(key => {
+      total[key] = (total[key] || 0) + impact[key] * count;
+    });
+
+    return total;
+  }, {});
+
+  for (let year = 2026; year <= 2050; year++) {
+    const newEntry = { year };
+    const fraction = (year - 2025) / yearsToSimulate;
+
+    newEntry.population = Math.round(
+      baseData.population * (1 + (totalImpactPercent.populationPercent || 0) * fraction)
+    );
+    newEntry.housingSatisfaction = Math.min(100, Math.max(0,
+      baseData.housingSatisfaction * (1 + (totalImpactPercent.housingSatisfactionPercent || 0) * fraction)
+    ));
+    newEntry.housingSupplyRate = Math.min(100, Math.max(0,
+      baseData.housingSupplyRate * (1 + (totalImpactPercent.housingSupplyPercent || 0) * fraction)
+    ));
+    newEntry.airQualityIndex = Math.min(500, Math.max(0,
+      baseData.airQualityIndex * (1 + (totalImpactPercent.airQualityPercent || 0) * fraction)
+    ));
+    newEntry.inflationRate = Math.max(0,
+      baseData.inflationRate * (1 + (totalImpactPercent.inflationPercent || 0) * fraction)
+    );
+    newEntry.trafficAccidents = Math.max(0, Math.round(
+      baseData.trafficAccidents * (1 + (totalImpactPercent.trafficPercent || 0) * fraction)
+    ));
+    newEntry.crimeRate = Math.max(0, Math.round(
+      baseData.crimeRate * (1 + (totalImpactPercent.crimePercent || 0) * fraction)
+    ));
+    newEntry.unemploymentRate = Math.max(0, Math.min(100,
+      baseData.unemploymentRate * (1 + (totalImpactPercent.unemploymentPercent || 0) * fraction)
+    ));
+
+    data.push(newEntry);
+  }
+
+  return data;
+};
 
 function App() {
+  const [loading, setLoading] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [budget, setBudget] = useState(10000);
+  const [markers, setMarkers] = useState(initialMarkers);
+  const [selectedBuilding, setSelectedBuilding] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [simulationData, setSimulationData] = useState([]);
+  const [isLegendOpen, setIsLegendOpen] = useState(false);
+  const [showAllIcons, setShowAllIcons] = useState(false);
+
+  // Filter out markers that are not in the initialMarkers
+  const newMarkers = markers.filter(
+    m =>
+      !initialMarkers.some(
+        im =>
+          im.position[0] === m.position[0] &&
+          im.position[1] === m.position[1] &&
+          im.buildingName === m.buildingName
+      )
+  );
+
+  const buildingUsage = buildingOptions.map(b => {
+    const count = newMarkers.filter(m => m.buildingName === b.name).length;
+    return {
+      name: b.name,
+      costPerUnit: b.cost,
+      count,
+      totalCost: b.cost * count,
+    };
+  });
+
+  const totalUsedBudget = buildingUsage.reduce((sum, b) => sum + b.totalCost, 0);
+
+  const displayedMarkers = selectedBuilding
+    ? markers.filter(marker => marker.buildingName === selectedBuilding.name)
+    : markers;
+
+  const center = [49.2488, -122.9805];
+  const zoom = 12;
+
+  const handleMapClick = (latlng) => {
+    if (!selectedBuilding) {
+      alert('Please select a building first.');
+      return;
+    }
+    if (!isInsideBurnaby(latlng)) {
+      alert('You can only place buildings within Burnaby!');
+      return;
+    }
+    if (budget < selectedBuilding.cost) {
+      alert('Insufficient budget!');
+      return;
+    }
+    setBudget(prev => prev - selectedBuilding.cost);
+    const newMarker = {
+      position: [latlng.lat, latlng.lng],
+      popup: selectedBuilding.popup,
+      buildingName: selectedBuilding.name,
+    };
+    setMarkers(prev => [...prev, newMarker]);
+  };
+
+  const simulateCityGrowth = () => {
+    setLoading(true);
+    setToastMessage('');
+    setTimeout(() => {
+      const results = runSimulation(markers);
+      setSimulationData(results);
+      setIsModalOpen(true);
+      setLoading(false);
+      setToastMessage('Simulation completed! Population and safety status updated.');
+      setTimeout(() => setToastMessage(''), 4000);
+      setShowAllIcons(true);
+    }, 1500);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 350px',
+          height: '100vh',
+          gap: '24px',
+          padding: '24px',
+          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+          backgroundColor: '#f7f9fc',
+          color: '#333',
+          position: 'relative',
+        }}
+      >
+        {/* Left MAP Panel*/}
+        <MapComponentWrapper
+          center={center}
+          zoom={zoom}
+          markers={displayedMarkers}
+          onMapClick={handleMapClick}
+          selectedBuilding={selectedBuilding}
+          style={{ height: '100%' }}
+          createIcon={null}
+          initialMarkers={initialMarkers} 
+        />
+
+        {/* Right Control Panel */}
+        <div
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px', gap: '10px' }}>
+            <h2 style={{ margin: 0, color: '#222', flexGrow: 1 }}>Select Building</h2>
+            <button
+              onClick={() => setIsLegendOpen(true)}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: '#3f51b5',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: '600',
+              }}
+            >
+              Show Legend
+            </button>
+          </div>
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '12px',
+                marginBottom: '24px',
+                maxHeight: 'calc(100vh - 300px)',
+                overflowY: 'auto',
+              }}
+            >
+              {buildingOptions.map((b) => (
+                <button
+                  key={b.name}
+                  onClick={() => {
+                    setSelectedBuilding(selectedBuilding?.label === b.label ? null : b);
+                  }}
+                  style={{
+                    flex: '1 0 45%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 16px',
+                    borderRadius: '6px',
+                    border: selectedBuilding?.name === b.name ? '2px solid #3f51b5' : '1px solid #ccc',
+                    backgroundColor: selectedBuilding?.name === b.name ? '#3f51b5' : '#fafafa',
+                    color: selectedBuilding?.name === b.name ? '#fff' : '#333',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    boxShadow: selectedBuilding?.name === b.name ? '0 4px 12px rgba(63,81,181,0.6)' : 'none',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedBuilding?.name !== b.name)
+                      e.currentTarget.style.backgroundColor = '#e8eaf6';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedBuilding?.name !== b.name)
+                      e.currentTarget.style.backgroundColor = '#fafafa';
+                  }}
+                >
+                  <img
+                    src={`/icons/${b.name.toLowerCase()}.png`}
+                    alt={b.name}
+                    style={{ width: 24, height: 24 }}
+                  />
+                  {b.label}
+                  <span style={{ marginLeft: 'auto', fontWeight: 'normal', color: '#ddd' }}>
+                    ₹{b.cost}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Selected Building and Budget */}
+          <div
+            style={{
+              marginTop: '8px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: '#222',
+            }}
+          >
+            <div>
+              Selected Building:{' '}
+              <span style={{ color: '#3f51b5', fontWeight: '700' }}>
+                {selectedBuilding ? selectedBuilding.name : 'No building selected'}
+              </span>
+              {selectedBuilding && (
+                <span
+                  style={{
+                    marginLeft: '8px',
+                    fontWeight: 'normal',
+                    color: '#666',
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  (Used: ₹
+                  {newMarkers.filter(m => m.buildingName === selectedBuilding.name).length *
+                    selectedBuilding.cost}
+                  )
+                </span>
+              )}
+            </div>
+            <div>
+              Budget: <span style={{ color: '#388e3c', fontWeight: '700' }}>₹{budget}</span>
+            </div>
+          </div>
+
+          {/* Simulate Button */}
+          <button
+            onClick={simulateCityGrowth}
+            disabled={budget !== 0 || loading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: budget === 0 && !loading ? '#3f51b5' : '#999',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: '700',
+              cursor: budget === 0 && !loading ? 'pointer' : 'not-allowed',
+              transition: 'background-color 0.3s ease',
+              position: 'relative',
+              marginTop: '12px',
+            }}
+            onMouseEnter={e => {
+              if (budget === 0 && !loading) e.currentTarget.style.backgroundColor = '#303f9f';
+            }}
+            onMouseLeave={e => {
+              if (budget === 0 && !loading) e.currentTarget.style.backgroundColor = '#3f51b5';
+            }}
+          >
+            {loading ? (
+              <>
+                <span
+                  className="loader"
+                  style={{
+                    border: '2px solid #fff',
+                    borderTop: '2px solid transparent',
+                    borderRadius: '50%',
+                    width: '16px',
+                    height: '16px',
+                    display: 'inline-block',
+                    marginRight: '8px',
+                    animation: 'spin 1s linear infinite',
+                    verticalAlign: 'middle',
+                  }}
+                ></span>
+                Simulating...
+              </>
+            ) : (
+              'Simulate'
+            )}
+          </button>
+          {/* Budget Usage */}           
+          <div style={{ marginTop: '20px', fontSize: '0.9rem', color: '#222' }}>
+            <h3 style={{ marginBottom: '8px' }}>Building Usage</h3>
+            <ul style={{ paddingLeft: '20px' }}>
+              {buildingUsage.map((b) => (
+                <li key={b.name}>
+                  {b.name}: ₹{b.totalCost} ({b.count} × ₹{b.costPerUnit})
+                </li>
+              ))}
+            </ul>
+            <div style={{ fontWeight: '700', marginTop: '8px' }}>
+              Total Used Budget: ₹{totalUsedBudget}
+            </div>
+          </div>
+
+          {/* Toast Message */}
+          {toastMessage && (
+            <div
+              style={{
+                marginTop: '12px',
+                padding: '12px',
+                backgroundColor: '#e0f2f1',
+                borderRadius: '6px',
+                color: '#004d40',
+                fontWeight: '600',
+                textAlign: 'center',
+                boxShadow: '0 1px 6px rgba(0,0,0,0.1)',
+              }}
+            >
+              {toastMessage}
+            </div>
+          )}
+        </div>
+      </div>
+      <LegendModal isOpen={isLegendOpen} onRequestClose={() => setIsLegendOpen(false)} />
+      <SimulationModal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        simulationData={simulationData}
+        facilitiesInstalled={buildingUsage.filter(b => b.count > 0).map(b => b.name)}
+      />
+
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+    </>
   );
 }
 
