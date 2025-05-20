@@ -1,70 +1,131 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Burnaby City Development Simulation
 
-## Available Scripts
+![Burnaby City](./screenshots/burnaby-map.png)
 
-In the project directory, you can run:
+A React-based interactive city development simulation for Burnaby, BC, showcasing the impact of different facilities on urban indicators from 2025 to 2050.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Overview
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+This project simulates the growth and development of Burnaby city by allowing users to place various facilities on a map within the city boundaries. The simulation models how these facilities influence key urban indicators such as population, traffic accidents, crime rates, housing satisfaction, unemployment, air quality, and inflation over a 25-year horizon.
 
-### `npm test`
+Users can:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Select and place buildings like Markets, Schools, Hospitals, and more on a detailed Burnaby map.
+- View baseline data (2025), forecasted trends (2050 projected), and user-driven scenarios (2050 user scenario).
+- Analyze a summary of overall policy impacts and detailed facility-level effects.
+- Access a legend explaining the positive and negative impacts of each facility.
+- Visualize placed buildings on the map with distinct icons and adjust the view.
+- Simulate and review results to inform urban planning and policy decisions.
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Features
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Interactive Map:** Leaflet.js-powered map with polygon boundaries for Burnaby.
+- **Facility Selection:** Users can select from a set of buildings with associated costs and impacts.
+- **Budget Management:** Place buildings within a budget constraint.
+- **Dynamic Simulation:** Calculates changes in urban indicators based on placed facilities.
+- **Detailed Reports:** Tabular summaries showing indicator comparisons and facility impact details.
+- **Policy Summaries:** Automatically generated overall and facility-specific policy suggestion summaries.
+- **Legend:** Clarifies benefits and drawbacks for each facility type.
+- **Responsive UI:** Modern, clean interface with easy navigation.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Technologies Used
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- React.js (Functional Components & Hooks)
+- React Leaflet (Map rendering and interaction)
+- Leaflet.js (Map library)
+- CSS Flexbox & Grid for layout
+- JavaScript ES6+
+- Modal dialogs for simulation results and legends
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Getting Started
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Prerequisites
 
-## Learn More
+- Node.js (v16 or newer recommended)
+- npm or yarn
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Installation
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+git clone https://github.com/yourusername/burnaby-city-simulation.git
+cd burnaby-city-simulation
+npm install
+```
 
-### Code Splitting
+### Running the App Locally
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+npm start
+```
 
-### Analyzing the Bundle Size
+Open your browser at `http://localhost:3000` to view the simulation.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## Project Structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- `src/`
+  - `components/` - React components for Map, Simulation Modal, Legend, etc.
+  - `constants/` - Data files including polygon coordinates, facility impact data, baseline, and forecast data.
+  - `utils/` - Helper functions for summaries and calculations.
+  - `App.js` - Main application component managing state and layout.
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Usage
 
-### Deployment
+1. Select a building type from the right panel.
+2. Click on the map inside Burnaby boundaries to place buildings.
+3. Monitor budget usage as you add buildings.
+4. Click **Simulate** when budget is fully used to generate and view simulation results.
+5. Review the summary and detailed reports.
+6. Use the **Show Legend** button to understand facility impacts.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## Screenshots
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Simulation Overview  
+![Simulation Screenshot](./screenshots/simulation-overview.png)
+
+### Policy Summary and Facility Impact Details  
+![Policy Summary Screenshot](./screenshots/policy-summary.png)
+
+### Facility Impact Legend  
+![Legend Screenshot](./screenshots/legend.png)
+
+---
+
+## Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request for review.
+
+---
+
+## License
+
+This project is licensed under the MIT License.
+
+---
+
+## Acknowledgements
+
+- Leaflet and React-Leaflet teams for map libraries.
+- OpenStreetMap contributors for map tiles.
+- Urban development policy frameworks inspiring simulation logic.
+
+---
+
+## Contact
+
+For questions or feedback, please contact [your-email@example.com].
+
