@@ -1,7 +1,8 @@
 
 # Burnaby City Development Simulation
 
-![Burnaby City](./screenshots/burnaby-map.png)
+![image](https://github.com/user-attachments/assets/defb8a73-fb91-41bd-864c-2bffcb3454f3)
+
 
 A React-based interactive city development simulation for Burnaby, BC, showcasing the impact of different facilities on urban indicators from 2025 to 2050.
 
@@ -95,13 +96,15 @@ Open your browser at `http://localhost:3000` to view the simulation.
 ## Screenshots
 
 ### Simulation Overview  
-![Simulation Screenshot](./screenshots/simulation-overview.png)
+![image](https://github.com/user-attachments/assets/eddff4e7-bdd5-4f10-b3ae-ba2e2cae5fa0)
+
 
 ### Policy Summary and Facility Impact Details  
-![Policy Summary Screenshot](./screenshots/policy-summary.png)
+![image](https://github.com/user-attachments/assets/3abbc1a5-208b-4583-9572-737c5b7efe80)
+
 
 ### Facility Impact Legend  
-![Legend Screenshot](./screenshots/legend.png)
+![image](https://github.com/user-attachments/assets/25751d13-d2c3-44e3-8ef9-00b979f5bd61)
 
 ---
 
