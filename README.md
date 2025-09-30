@@ -1,5 +1,5 @@
 
-# Burnaby City Development Simulation
+# NextGen SmartCity Simulation
 
 ![image](https://github.com/user-attachments/assets/defb8a73-fb91-41bd-864c-2bffcb3454f3)
 
