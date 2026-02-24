@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/city-sim/static/css/main.323d7611.css",
-    "main.js": "/city-sim/static/js/main.8526b71e.js",
+    "main.js": "/city-sim/static/js/main.d74773c8.js",
     "static/js/453.1bceff5b.chunk.js": "/city-sim/static/js/453.1bceff5b.chunk.js",
     "index.html": "/city-sim/index.html",
     "main.323d7611.css.map": "/city-sim/static/css/main.323d7611.css.map",
-    "main.8526b71e.js.map": "/city-sim/static/js/main.8526b71e.js.map",
+    "main.d74773c8.js.map": "/city-sim/static/js/main.d74773c8.js.map",
     "453.1bceff5b.chunk.js.map": "/city-sim/static/js/453.1bceff5b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.323d7611.css",
-    "static/js/main.8526b71e.js"
+    "static/js/main.d74773c8.js"
   ]
 }
