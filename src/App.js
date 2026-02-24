@@ -276,13 +276,13 @@ function App() {
                   }}
                 >
                   <img
-                    src={`/icons/${b.name.toLowerCase()}.png`}
+                    src={process.env.PUBLIC_URL + `/icons/${b.name.toLowerCase()}.png`}
                     alt={b.name}
                     style={{ width: 24, height: 24 }}
                   />
                   {b.label}
                   <span style={{ marginLeft: 'auto', fontWeight: 'normal', color: '#ddd' }}>
-                    ₹{b.cost}
+                    ${b.cost}
                   </span>
                 </button>
               ))}
@@ -315,7 +315,7 @@ function App() {
                     fontSize: '0.9rem',
                   }}
                 >
-                  (Used: ₹
+                  (Used: $
                   {newMarkers.filter(m => m.buildingName === selectedBuilding.name).length *
                     selectedBuilding.cost}
                   )
@@ -323,7 +323,7 @@ function App() {
               )}
             </div>
             <div>
-              Budget: <span style={{ color: '#388e3c', fontWeight: '700' }}>₹{budget}</span>
+              Budget: <span style={{ color: '#388e3c', fontWeight: '700' }}>${budget}</span>
             </div>
           </div>
 
@@ -379,12 +379,12 @@ function App() {
             <ul style={{ paddingLeft: '20px' }}>
               {buildingUsage.map((b) => (
                 <li key={b.name}>
-                  {b.name}: ₹{b.totalCost} ({b.count} × ₹{b.costPerUnit})
+                  {b.name}: ${b.totalCost} ({b.count} × ${b.costPerUnit})
                 </li>
               ))}
             </ul>
             <div style={{ fontWeight: '700', marginTop: '8px' }}>
-              Total Used Budget: ₹{totalUsedBudget}
+              Total Used Budget: ${totalUsedBudget}
             </div>
           </div>
 

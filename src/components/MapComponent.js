@@ -32,14 +32,14 @@ const defaultIcon = new L.Icon({
 });
 
 const iconMap = {
-  Market: createIcon('/icons/market.png'),
-  School: createIcon('/icons/school.png'),
-  CommunityCentre: createIcon('/icons/communitycentre.png'),
-  Hospital: createIcon('/icons/hospital.png'),
-  PoliceStation: createIcon('/icons/policestation.png'),
-  NonProfitHousing: createIcon('/icons/nonprofithousing.png'),
-  Daycare: createIcon('/icons/daycare.png'),
-  SeniorCentre: createIcon('/icons/seniorcentre.png'),
+  Market: createIcon(process.env.PUBLIC_URL + '/icons/market.png'),
+  School: createIcon(process.env.PUBLIC_URL + '/icons/school.png'),
+  CommunityCentre: createIcon(process.env.PUBLIC_URL + '/icons/communitycentre.png'),
+  Hospital: createIcon(process.env.PUBLIC_URL + '/icons/hospital.png'),
+  PoliceStation: createIcon(process.env.PUBLIC_URL + '/icons/policestation.png'),
+  NonProfitHousing: createIcon(process.env.PUBLIC_URL + '/icons/nonprofithousing.png'),
+  Daycare: createIcon(process.env.PUBLIC_URL + '/icons/daycare.png'),
+  SeniorCentre: createIcon(process.env.PUBLIC_URL + '/icons/seniorcentre.png'),
 };
 
 const MapEventHandler = React.memo(({ onUserMove }) => {
